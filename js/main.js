@@ -91,7 +91,7 @@
   let ultimoResultado = null;
   let ultimaFotoDataUrl = null;
   let ultimaFotoReversoUrl = null, dniDeLaFoto = null;
-  let ladoFoto = 'frente';   // Registro: de qué lado del DNI es ultimaFotoDataUrl (el QR del DNI nuevo y la lectura directa son del reverso)   // v48: foto del reverso (para verla ampliada en la ficha)
+  let ladoFoto = 'frente', ultimaFotoCompletaUrl = null;   // Registro: de qué lado del DNI es ultimaFotoDataUrl (el QR del DNI nuevo y la lectura directa son del reverso)   // v48: foto del reverso (para verla ampliada en la ficha)
   let paisSeleccionado = localStorage.getItem(PAIS_KEY) || 'arg';
   // Tipo de DNI argentino elegido arriba de la cámara: 'viejo' (código de barras en el frente) o 'nuevo' (QR atrás).
   // Con el tipo sabido, la cámara busca solo lo que corresponde: más rápido y sin trabar la imagen.
@@ -398,7 +398,8 @@
     if (flashEncendido && trackActual) { trackActual.applyConstraints({ advanced: [{ torch: false }] }).catch(() => {}); flashEncendido = false; autoFlashActivo = false; if (btnFlash) btnFlash.classList.remove('encendido'); }
     
     const dataUrl = canvas.toDataURL('image/jpeg', 0.8); 
-    ultimaFotoDataUrl = dataUrl;
+    ultimaFotoCompletaUrl = dataUrl;   // la imagen entera: la usa la lectura del texto del frente (completarDesdeFrente)
+    ultimaFotoDataUrl = fotoDelMarco(canvas).toDataURL('image/jpeg', 0.85);
     
     if (img) { img.src = dataUrl; img.hidden = false; } video.hidden = true;
     if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } trackActual = null; if (zoomControl) zoomControl.hidden = true;
@@ -884,18 +885,32 @@
         if (r.w > 50 && r.h > 50) marcoRel = [r.x / vw, r.y / vh, (r.x + r.w) / vw, (r.y + r.h) / vh]; } catch (e) { marcoRel = null; }
     }
     if (btnCapturarDomicilio) btnCapturarDomicilio.disabled = false;
+    // Registro: la foto que se muestra y se guarda es solo lo de adentro del marco (la lectura usa la foto entera)
+    let recorte = null;
+    try {
+      const vw = domicilioVideo.videoWidth, vh = domicilioVideo.videoHeight;
+      const r = rectEnVideo(domicilioVideo, marcoClient(), 0.03);
+      if (foto && vw && r.w > 50 && r.h > 50 && (foto.width > foto.height) === (vw > vh)) {
+        let cw = foto.width, ch = foto.height;
+        if (cw / ch > vw / vh) cw = ch * vw / vh; else ch = cw * vh / vw;   // la foto del sensor puede abarcar más que el video
+        const k = cw / vw, ox = (foto.width - cw) / 2, oy = (foto.height - ch) / 2;
+        const x0 = Math.max(0, ox + r.x * k), y0 = Math.max(0, oy + r.y * k);
+        const w = Math.min(foto.width - x0, r.w * k), h = Math.min(foto.height - y0, r.h * k);
+        if (w > 80 && h > 50) recorte = recortarRect(foto, { x: x0, y: y0, w, h });
+      }
+    } catch (e) { recorte = null; }
     detenerCamaraModal();
     vibrarExito();
-    await procesarFotoReverso(foto, marcoRel);
+    await procesarFotoReverso(foto, marcoRel, recorte);
   }
 
-  async function procesarFotoReverso(foto, marcoRel) {
+  async function procesarFotoReverso(foto, marcoRel, recorte) {
     modoFotoReverso = true;
     ocultarMarcoDomicilio(); detenerMonitorLuz();
     if (btnCapturarDomicilio) btnCapturarDomicilio.hidden = true;
     asegurarBotonCamaraNativa(false);
     if (domicilioVideo) domicilioVideo.hidden = true;
-    if (domicilioPreview) { domicilioPreview.src = foto.toDataURL('image/jpeg', 0.88); domicilioPreview.hidden = false; }   // (calidad alta: se puede ampliar)
+    if (domicilioPreview) { domicilioPreview.src = (recorte || foto).toDataURL('image/jpeg', 0.88); domicilioPreview.hidden = false; }   // (calidad alta: se puede ampliar)
     if (domicilioResultado) domicilioResultado.hidden = true;
     if (domicilioProgress) domicilioProgress.hidden = false;
     if (domicilioProgressFill) domicilioProgressFill.style.width = '0%';
@@ -1003,8 +1018,8 @@
 
   function marcoClient() {
     const vr = areaVisible(domicilioVideo);
-    let w = vr.width * 0.92, h = w / RATIO_DNI;
-    if (h > vr.height * 0.92) { h = vr.height * 0.92; w = h * RATIO_DNI; }
+    let w = vr.width * 0.96, h = w / RATIO_DNI;   // Registro: marco más grande (casi todo el ancho)
+    if (h > vr.height * 0.96) { h = vr.height * 0.96; w = h * RATIO_DNI; }
     return { left: vr.left + (vr.width - w) / 2, top: vr.top + (vr.height - h) / 2, width: w, height: h };
   }
 
@@ -1272,7 +1287,7 @@
       if (autoScanActivo && (acumR.domicilio || acumR.cuil || acumR.lugarNacimiento)) {
         autoScanProcesando = false; autoScanActivo = false;
         detenerCamaraModal();
-        if (domicilioPreview && mejorR) { domicilioPreview.src = mejorR.toDataURL('image/jpeg', 0.7); domicilioPreview.hidden = false; }
+        if (domicilioPreview && mejorR) { domicilioPreview.src = (mejorR.marcoRel ? fotoDelMarco(mejorR) : mejorR).toDataURL('image/jpeg', 0.8); domicilioPreview.hidden = false; }
         if (domicilioVideo) domicilioVideo.hidden = true;
         if (domInputDomicilio) domInputDomicilio.value = acumR.domicilio || '';
         if (domInputNacimiento) domInputNacimiento.value = acumR.lugarNacimiento || '';
@@ -1345,7 +1360,7 @@
     ultimaIdentidad = hayIdentidad ? combinarIdentidad(qr, ident) : null;
     tramiteReverso = acum.tramite || null;
     detenerCamaraModal();
-    if (domicilioPreview && mejorCanvas) { domicilioPreview.src = mejorCanvas.toDataURL('image/jpeg', 0.7); domicilioPreview.hidden = false; }
+    if (domicilioPreview && mejorCanvas) { domicilioPreview.src = (mejorCanvas.marcoRel ? fotoDelMarco(mejorCanvas) : mejorCanvas).toDataURL('image/jpeg', 0.8); domicilioPreview.hidden = false; }
     if (domicilioVideo) domicilioVideo.hidden = true;
     if (domInputDomicilio) domInputDomicilio.value = acum.domicilio || '';
     if (domInputNacimiento) domInputNacimiento.value = acum.lugarNacimiento || '';
@@ -1454,6 +1469,36 @@
     return o;
   }
 
+  // Registro: la foto que se guarda y se muestra es solo lo que está dentro del marco (sin el fondo de alrededor).
+  // c = la imagen; rc = dónde está c dentro del video (si es un recorte), en píxeles de un video de ancho anchoRef.
+  function fotoDelMarco(c, rc, anchoRef) {
+    try {
+      if (!c || !c.width || !c.height) return c;
+      let r = null;
+      if (Array.isArray(c.marcoRel) && c.marcoRel.length === 4) {
+        const [a, b, cc, d] = c.marcoRel, mx = (cc - a) * 0.03, my = (d - b) * 0.03;
+        const x0 = Math.max(0, a - mx), y0 = Math.max(0, b - my), x1 = Math.min(1, cc + mx), y1 = Math.min(1, d + my);
+        r = { x: x0 * c.width, y: y0 * c.height, w: (x1 - x0) * c.width, h: (y1 - y0) * c.height };
+      } else if (video && video.videoWidth && scanFrame && !video.hidden) {
+        const bb = scanFrame.getBoundingClientRect();
+        if (bb.width > 40 && bb.height > 40) {
+          const vw = video.videoWidth, vh = video.videoHeight;
+          const kv = anchoRef ? anchoRef / vw : 1;   // por si el video cambió de resolución
+          const base = rc || (Math.abs(c.width / c.height - vw / vh) < 0.03 ? { x: 0, y: 0, w: vw * kv, h: vh * kv } : null);
+          if (base) {
+            const rv = rectEnVideo(video, { left: bb.left, top: bb.top, width: bb.width, height: bb.height }, 0.03);
+            const k = c.width / base.w;
+            r = { x: (rv.x * kv - base.x) * k, y: (rv.y * kv - base.y) * k, w: rv.w * kv * k, h: rv.h * kv * k };
+            const x0 = Math.max(0, r.x), y0 = Math.max(0, r.y);
+            r = { x: x0, y: y0, w: Math.min(c.width, r.x + r.w) - x0, h: Math.min(c.height, r.y + r.h) - y0 };
+          }
+        }
+      }
+      if (!r || ![r.x, r.y, r.w, r.h].every(Number.isFinite) || r.w < 80 || r.h < 50) return c;
+      return recortarRect(c, r);
+    } catch (e) { return c; }
+  }
+
   function canvasDesdeImagen(im) {
     const c = document.createElement('canvas');
     c.width = im.naturalWidth || im.width; c.height = im.naturalHeight || im.height;
@@ -1531,7 +1576,7 @@
       }
     } catch (e) { foto = frame; }
     if (flashEncendido && trackActual) { trackActual.applyConstraints({ advanced: [{ torch: false }] }).catch(() => {}); flashEncendido = false; autoFlashActivo = false; if (btnFlash) btnFlash.classList.remove('encendido'); }
-    ultimaFotoDataUrl = foto.toDataURL('image/jpeg', 0.8); ladoFoto = 'reverso';
+    ultimaFotoDataUrl = fotoDelMarco(foto).toDataURL('image/jpeg', 0.85); ladoFoto = 'reverso'; ultimaFotoCompletaUrl = null;
     if (img) { img.src = ultimaFotoDataUrl; img.hidden = false; } if (video) video.hidden = true;
     if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
     trackActual = null; if (zoomControl) zoomControl.hidden = true;
@@ -1618,8 +1663,8 @@
       trackActual.applyConstraints({ advanced: [{ torch: false }] }).catch(() => {});
       flashEncendido = false; autoFlashActivo = false; if (btnFlash) btnFlash.classList.remove('encendido');
     }
-    const dataUrl = frame.toDataURL('image/jpeg', 0.8);
-    ultimaFotoDataUrl = dataUrl; ladoFoto = 'reverso';
+    const dataUrl = fotoDelMarco(frame, origen && origen.rc, origen && origen.anchoVideo).toDataURL('image/jpeg', 0.85);
+    ultimaFotoDataUrl = dataUrl; ladoFoto = 'reverso'; ultimaFotoCompletaUrl = null;
     if (img) { img.src = dataUrl; img.hidden = false; } if (video) video.hidden = true;
     if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
     trackActual = null; if (zoomControl) zoomControl.hidden = true;
@@ -1873,7 +1918,7 @@
     }
     if (auto) { detenerDeteccionDNINuevo(); if (stopScan) { stopScan(); stopScan = null; } }
     setEstadoMarco('ok'); animarCaptura();
-    ultimaFotoDataUrl = canvasF.toDataURL('image/jpeg', 0.8); ladoFoto = 'frente';
+    ultimaFotoDataUrl = fotoDelMarco(canvasF).toDataURL('image/jpeg', 0.85); ladoFoto = 'frente'; ultimaFotoCompletaUrl = null;
     if (img) { img.src = ultimaFotoDataUrl; img.hidden = false; } if (video) video.hidden = true;
     if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } trackActual = null; if (zoomControl) zoomControl.hidden = true;
     if (scanFrame) scanFrame.classList.remove('activo');
@@ -1911,7 +1956,7 @@
     const previo = escaneoEstado ? escaneoEstado.textContent : '';
     try {
       if (escaneoEstado) escaneoEstado.textContent = '🔍 Completando datos con el frente…';
-      const textos = await DomicilioOCR.leerFrente(ultimaFotoDataUrl, null, (t) => FrenteDNI.completo(FrenteDNI.parsearVarios(t)));
+      const textos = await DomicilioOCR.leerFrente(ultimaFotoCompletaUrl || ultimaFotoDataUrl, null, (t) => FrenteDNI.completo(FrenteDNI.parsearVarios(t)));
       const r = FrenteDNI.parsearVarios(textos);
       if (!r || ultimoResultado !== d) return;
       if (r.dni && d.dni && r.dni !== d.dni && FrenteDNI.similitud(r.dni, d.dni) < 0.75) return;   // no es el mismo documento

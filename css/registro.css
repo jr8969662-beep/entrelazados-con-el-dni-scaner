@@ -98,3 +98,76 @@
 .reg-est-en-revision { background: rgba(242, 184, 75, .16); color: var(--warn); }
 .reg-est-listo-para-entregar { background: var(--blue-soft); color: var(--blue); }
 .reg-est-entregado { background: var(--ok-soft); color: var(--ok); }
+
+
+/* ==========================================================
+   v2 — Todo más grande y legible en el celular (como la APK del escáner)
+   ========================================================== */
+.registro-panel { padding: 18px 16px 20px; }
+.registro-panel .group-title { font-size: 13px; }
+.reg-donde { font-size: 15px; }
+.reg-aviso { font-size: 15px; padding: 12px 14px; line-height: 1.45; }
+.reg-foto { min-height: 56px; font-size: 15px; }
+.reg-campo { font-size: 14px; gap: 6px; color: var(--text-secondary); }
+.reg-campo input, .reg-campo select, .reg-buscar, #reg-filtro, .reg-tramite select { min-height: 50px; font-size: 16px; padding: 10px 12px; }
+.reg-check { font-size: 15px; line-height: 1.45; }
+.reg-check input { width: 24px; height: 24px; }
+.reg-error { font-size: 15px; }
+.reg-botones .btn { min-height: 52px; font-size: 15px; }
+.reg-botones .btn-sm { min-height: 46px; font-size: 14px; }
+.reg-link { font-size: inherit; }
+
+.reg-tabs button { font-size: 15px; padding: 14px 14px; }
+.reg-item { padding: 16px; gap: 14px; }
+.reg-item-dni { font-size: 16px; }
+.reg-item-nom { font-size: 16px; }
+.reg-item-nom small { font-size: 13.5px; margin-top: 2px; }
+.reg-chip { font-size: 12.5px; padding: 3px 10px; }
+.reg-ficha { gap: 18px; }
+.reg-ident-dni { font-size: 32px; }
+.reg-ident-nom { font-size: 23px; line-height: 1.25; }
+.reg-ident-sub { font-size: 15px; }
+.reg-fotos-ficha figcaption { font-size: 13px; }
+.reg-datos { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px 18px; }
+.reg-dato span { font-size: 13.5px; }
+.reg-dato b { font-size: 16.5px; }
+.reg-nota, .reg-sub { font-size: 14px; line-height: 1.45; }
+.reg-h3 { font-size: 13px; }
+.reg-tramite { padding: 14px 0; font-size: 15.5px; }
+.reg-tramite select { min-height: 46px; }
+.reg-ficha .btn-sm, .reg-nuevo .btn-sm, .reg-ajuste .btn-sm, .reg-borrar .btn-sm { min-height: 46px; font-size: 14px; }
+.reg-texto { font-size: 16px; line-height: 1.5; }
+.reg-ajuste h4 { font-size: 16px; }
+.reg-json { font-size: 13px; }
+.reg-tabla { font-size: 15px; }
+.reg-tabla th { font-size: 12px; }
+.reg-est { font-size: 13px; padding: 4px 10px; }
+.empty-state { font-size: 15.5px; line-height: 1.5; }
+
+/* el Registro ocupa toda la pantalla en el celular */
+@media (max-width: 640px) {
+  .reg-modal { padding: 0; }
+  .reg-modal-content { width: 100%; height: 100%; max-height: 100%; border-radius: 0; border-left: 0; border-right: 0; padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .reg-modal .modal-header { padding-top: calc(14px + env(safe-area-inset-top, 0px)); }
+  .reg-modal .modal-header h2 { font-size: 16px; }
+  .reg-modal .icon-btn-close { width: 44px; height: 44px; font-size: 20px; }
+  .reg-item { grid-template-columns: minmax(0, 1fr) auto; }
+  .reg-item-dni { grid-column: 1 / -1; }
+}
+
+/* ---------- cámara del reverso: pantalla completa y marco grande ---------- */
+.domicilio-preview { object-fit: contain !important; background: #000; }
+@media (max-width: 640px) {
+  #modal-domicilio { padding: 0; align-items: stretch; }
+  #modal-domicilio .modal-domicilio-content { max-width: 100%; width: 100%; max-height: 100%; height: 100%; border-radius: 0; border-left: 0; border-right: 0; }
+  #modal-domicilio .modal-header { padding-top: calc(14px + env(safe-area-inset-top, 0px)); }
+  #modal-domicilio .modal-header h2 { font-size: 16px; }
+  #modal-domicilio .modal-footer { padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+  #modal-domicilio .modal-footer .btn { min-height: 50px; font-size: 15px; }
+  /* (se mantiene 4:3: más alto achicaría la parte del video que cae en el marco y la letra se leería peor) */
+  .dni-marco-hint { font-size: 14px !important; padding: 6px 12px !important; }
+  .domicilio-progress-text { font-size: 15px; }
+  .domicilio-info, .domicilio-aviso { font-size: 14.5px; }
+  .domicilio-label { font-size: 13px; }
+  .domicilio-input { min-height: 50px; font-size: 16px; }
+}
