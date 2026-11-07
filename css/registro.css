@@ -1,0 +1,100 @@
+/* ==========================================================
+   Registro DNI — panel en la ficha y pantalla del Registro.
+   Usa los mismos colores del escáner (css/styles.css).
+   ========================================================== */
+
+/* el historial local del escáner no se usa acá: lo reemplaza el Registro */
+#btn-historial, #btn-guardar-historial { display: none !important; }
+
+.reg-btn-barra { width: auto !important; padding: 0 12px !important; gap: 6px; font-weight: 700; font-size: 12.5px; letter-spacing: .04em; }
+.reg-btn-barra span { white-space: nowrap; }
+@media (max-width: 420px) { .reg-btn-barra span { display: none; } .reg-btn-barra { padding: 0 !important; width: 40px !important; } }
+
+/* ---------- panel en la ficha ---------- */
+.registro-panel { background: var(--accent-soft); border-top: 1px solid var(--accent); }
+.registro-panel[hidden] { display: none; }
+.reg-donde { margin: 0 0 10px; font-size: 13px; color: var(--text-secondary); }
+.reg-aviso { margin: 0 0 10px; padding: 9px 11px; border-radius: var(--radius-sm); font-size: 13px; background: var(--panel-2); border: 1px solid var(--line); }
+.reg-aviso.info { border-color: var(--blue); background: var(--blue-soft); }
+.reg-aviso.ok { border-color: var(--ok); background: var(--ok-soft); color: var(--ok); }
+.reg-aviso.error { border-color: var(--err); background: var(--err-soft); color: var(--err); }
+.reg-fotos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.reg-foto { position: relative; display: flex; align-items: center; justify-content: center; text-align: center; min-height: 44px; padding: 8px; border-radius: var(--radius-sm);
+  border: 1px dashed var(--warn); color: var(--warn); font-size: 12.5px; font-weight: 700; cursor: pointer; background: var(--panel); }
+.reg-foto.ok { border-style: solid; border-color: var(--ok); color: var(--ok); }
+.reg-foto input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.reg-campos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.reg-campo { display: grid; gap: 4px; font-size: 12px; color: var(--text-muted); min-width: 0; }
+.reg-campo input, .reg-campo select, .reg-buscar, #reg-filtro, .reg-tramite select {
+  width: 100%; min-width: 0; min-height: 40px; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--line);
+  background: var(--panel); color: var(--text); font: inherit; font-size: 14px; }
+.reg-ancho { grid-column: 1 / -1; }
+.reg-check { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--text-secondary); margin-bottom: 10px; }
+.reg-check input { width: 20px; height: 20px; flex: none; margin-top: 1px; accent-color: var(--accent); }
+.reg-error { margin: 0 0 10px; color: var(--err); font-size: 13px; font-weight: 600; }
+.reg-error[hidden] { display: none; }
+.reg-botones { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.reg-botones .btn-primary { flex: 1 1 220px; }
+.reg-link { background: none; border: 0; padding: 0; color: var(--accent); font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
+@media (max-width: 480px) { .reg-campos, .reg-fotos { grid-template-columns: 1fr; } }
+
+/* ---------- pantalla del Registro ---------- */
+.reg-modal-content { width: min(860px, 100%); max-height: 100%; height: min(92vh, 900px); display: flex; flex-direction: column; }
+.reg-tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--line); background: var(--panel-2); padding: 0 8px; }
+.reg-tabs button { flex: none; background: none; border: 0; border-bottom: 3px solid transparent; color: var(--text-muted); font: inherit; font-weight: 700; font-size: 13px; padding: 11px 12px; cursor: pointer; }
+.reg-tabs button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+.reg-cuerpo { padding-bottom: 24px; }
+.reg-pad { padding: 14px 16px; }
+.reg-fila { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.reg-spacer { flex: 1; }
+.reg-lista { border-top: 1px solid var(--line-soft); }
+.reg-item { display: grid; grid-template-columns: 110px minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%; padding: 12px 16px; border: 0; border-bottom: 1px solid var(--line-soft); background: none; color: var(--text); text-align: left; font: inherit; cursor: pointer; }
+.reg-item:hover { background: var(--panel-2); }
+.reg-item-dni, .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.reg-item-dni { font-weight: 700; color: var(--accent); }
+.reg-item-nom { min-width: 0; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.reg-item-nom small { display: block; font-weight: 400; font-size: 12px; color: var(--text-muted); }
+.reg-chip { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .04em; padding: 2px 8px; border-radius: 99px; white-space: nowrap; }
+.reg-chip.nuevo { background: var(--blue-soft); color: var(--blue); }
+.reg-chip.viejo { background: var(--accent-soft); color: var(--accent); }
+@media (max-width: 480px) { .reg-item { grid-template-columns: minmax(0, 1fr) auto; } .reg-item-dni { grid-column: 1 / -1; } }
+
+.reg-ficha { display: grid; gap: 14px; }
+.reg-ident-dni { font-family: var(--mono); font-size: 26px; font-weight: 800; color: var(--accent); letter-spacing: .02em; }
+.reg-ident-nom { font-size: 20px; font-weight: 800; text-transform: uppercase; overflow-wrap: anywhere; }
+.reg-ident-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+.reg-fotos-ficha { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.reg-fotos-ficha figure { margin: 0; display: grid; gap: 4px; }
+.reg-fotos-ficha figcaption { font-size: 11.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); }
+.reg-sin-foto { aspect-ratio: 1.586; display: grid; place-items: center; border: 1px dashed var(--line); border-radius: var(--radius-sm); color: var(--text-muted); font-size: 12.5px; }
+.reg-foto-btn { padding: 0; border: 1px solid var(--line); border-radius: var(--radius-sm); overflow: hidden; background: #000; aspect-ratio: 1.586; cursor: zoom-in; }
+.reg-foto-btn img { width: 100%; height: 100%; object-fit: contain; display: block; }
+@media (max-width: 480px) { .reg-fotos-ficha { grid-template-columns: 1fr; } }
+.reg-datos { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px 16px; }
+.reg-dato { display: grid; gap: 2px; min-width: 0; }
+.reg-dato span { font-size: 12px; color: var(--text-muted); }
+.reg-dato b { overflow-wrap: anywhere; }
+.reg-nota, .reg-sub { font-size: 12.5px; color: var(--text-muted); margin: 0; }
+.reg-h3 { margin: 6px 0 0; font-size: 11.5px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+.reg-tramites { display: grid; }
+.reg-tramite { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; align-items: center; padding: 10px 0; border-bottom: 1px dashed var(--line-soft); }
+.reg-tramite select { min-height: 36px; width: auto; }
+.reg-nuevo { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: end; }
+@media (max-width: 560px) { .reg-nuevo { grid-template-columns: 1fr; } }
+.reg-borrar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; color: var(--err); }
+.reg-btn-peligro { background: var(--err); color: #fff; border-color: var(--err); }
+.reg-json { margin: 0; padding: 12px; border-radius: var(--radius-sm); background: var(--bg-2); border: 1px solid var(--line); font-family: var(--mono); font-size: 12px; line-height: 1.5; overflow-x: auto; white-space: pre; }
+.reg-json[hidden] { display: none; }
+.reg-texto { display: grid; gap: 12px; font-size: 14px; }
+.reg-texto p { margin: 0; }
+.reg-ajuste { display: grid; gap: 10px; padding: 14px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel-2); }
+.reg-ajuste h4 { margin: 0; font-size: 14px; }
+
+.reg-tabla-c { overflow-x: auto; }
+.reg-tabla { width: 100%; min-width: 560px; border-collapse: collapse; font-size: 13.5px; }
+.reg-tabla th, .reg-tabla td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+.reg-tabla th { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); background: var(--panel-2); }
+.reg-est { display: inline-block; font-size: 11.5px; font-weight: 800; padding: 3px 9px; border-radius: 99px; white-space: nowrap; background: var(--panel-2); color: var(--text-secondary); }
+.reg-est-en-revision { background: rgba(242, 184, 75, .16); color: var(--warn); }
+.reg-est-listo-para-entregar { background: var(--blue-soft); color: var(--blue); }
+.reg-est-entregado { background: var(--ok-soft); color: var(--ok); }
