@@ -11,7 +11,7 @@
   'use strict';
   const LISTO_KEY = 'sin_internet_listo';
   const LISTO_VERSION = 'motores-1';           // subir si cambian los archivos de los motores (Tesseract / ZXing)
-  const MOTORES = 'escaner-dni-motores-v1';   // misma caché que sw.js
+  const MOTORES = 'registro-dni-motores-v1';   // misma caché que sw.js
   let chip = null, preparando = false;
 
   const listo = () => { try { return localStorage.getItem(LISTO_KEY) === LISTO_VERSION; } catch (e) { return false; } };

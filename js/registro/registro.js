@@ -210,10 +210,11 @@
   function cerrarRegistro() {
     $('#modal-registro').hidden = true; document.body.style.overflow = '';
     urlsFotos.splice(0).forEach((u) => { if (Almacen.modo() === 'local') URL.revokeObjectURL(u); });
-    actualizarPanel();
+    actualizarPanel(); marcarNav();
   }
 
   function pintar() {
+    marcarNav();
     document.querySelectorAll('.reg-tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.v === vista)));
     const c = $('#reg-cuerpo');
     if (vista !== 'ajustes' && !Almacen.conectado()) { vista = 'ajustes'; return pintar(); }
@@ -407,7 +408,43 @@ Authorization: Bearer &lt;clave del sistema&gt;</pre>
     acciones.insertBefore(b, acciones.firstChild);
   }
 
-  function iniciar() { armarBoton(); armarPanel(); actualizarPanel(); }
+
+  // ---------- barra de navegación de abajo: Escanear · Personas · Trámites · Ajustes ----------
+  const ICON = {
+    escanear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="8" width="10" height="8" rx="1.5"/></svg>',
+    personas: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+    tramites: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 12l2 2 4-4M9 17h6"/></svg>',
+    ajustes: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>'
+  };
+  function armarNav() {
+    if ($('#reg-nav')) return;
+    const n = document.createElement('nav');
+    n.className = 'reg-nav'; n.id = 'reg-nav'; n.setAttribute('aria-label', 'Secciones');
+    n.innerHTML = [['escanear', 'Escanear'], ['personas', 'Personas'], ['tramites', 'Trámites'], ['ajustes', 'Ajustes']]
+      .map(([k, t]) => `<button type="button" data-nav="${k}">${ICON[k]}<span>${t}</span></button>`).join('');
+    document.body.appendChild(n); document.body.classList.add('con-nav');
+    n.addEventListener('click', (ev) => {
+      const b = ev.target.closest('[data-nav]'); if (!b) return;
+      const k = b.dataset.nav;
+      if (k === 'escanear') { const m = $('#modal-registro'); if (m && !m.hidden) cerrarRegistro(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+      else abrirRegistro(null, k);
+      marcarNav();
+    });
+    marcarNav();
+  }
+  function marcarNav() {
+    const m = $('#modal-registro'), abierto = m && !m.hidden;
+    const actual = !abierto ? 'escanear' : (vista === 'tramites' ? 'tramites' : vista === 'ajustes' ? 'ajustes' : 'personas');
+    document.querySelectorAll('#reg-nav [data-nav]').forEach((b) => { if (b.dataset.nav === actual) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+  }
+  // el Registro es para el DNI argentino: si quedó elegido otro país, se vuelve a Argentina
+  function asegurarArgentina() {
+    try { if ((localStorage.getItem('pais_escaner') || 'arg') !== 'arg') { const c = document.querySelector('.country-chip[data-country="arg"]'); if (c) c.click(); } } catch (e) { /* nada */ }
+    const c = document.querySelector('.country-chip[data-country="arg"]');
+    if (c && !c.classList.contains('active')) c.click();
+  }
+
+  function iniciar() { asegurarArgentina(); armarBoton(); armarNav(); armarPanel(); actualizarPanel(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar); else iniciar();
   window.RegistroDNI = { abrir: abrirRegistro, actualizar: actualizarPanel };
 })();

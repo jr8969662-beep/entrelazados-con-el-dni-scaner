@@ -244,3 +244,103 @@
   .brand-icon { width: 38px; height: 44px; }
   .brand-text h1 { font-size: 17px; letter-spacing: .05em; }
 }
+
+/* ==========================================================
+   v4 — Interfaz profesional
+   Criterio: menos mayúsculas y menos dorado; el dorado marca solo lo principal.
+   Tarjetas limpias, botones con texto normal, barra de navegación abajo (como una app).
+   ========================================================== */
+:root { --radius: 14px; --radius-sm: 10px; --nav-h: 64px; }
+body { background-image: none; letter-spacing: 0; }
+
+/* el Registro es solo para el DNI argentino: el selector de países no se muestra */
+#country-selector { display: none !important; }
+
+/* encabezado */
+.app-header { box-shadow: none; border-bottom: 1px solid var(--line); }
+.brand-text h1 { text-transform: none; letter-spacing: 0; font-weight: 800; }
+.brand-text p { text-transform: none; letter-spacing: 0; }
+.status-pill { text-transform: none; letter-spacing: 0; font-weight: 600; }
+.app-version { font-weight: 700; }
+
+/* títulos de sección: texto normal, el dorado queda en el ícono */
+.tipo-dni-label, .country-selector-label, .group-title, .reg-h3 { text-transform: none; letter-spacing: .01em; color: var(--text-secondary); font-weight: 700; }
+.group-title svg { color: var(--accent); }
+.result-header h2, .modal-header h2 { text-transform: none; letter-spacing: 0; font-weight: 800; }
+.main-number-label { text-transform: none; letter-spacing: .02em; }
+.badge { letter-spacing: .02em; }
+
+/* botones */
+.btn { text-transform: none; letter-spacing: 0; font-weight: 700; border-radius: var(--radius-sm); }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #14181f; }
+.btn-primary:hover { background: var(--accent); filter: brightness(1.07); }
+.btn-domicilio { text-transform: none; letter-spacing: 0; border-radius: var(--radius-sm); }
+
+/* tarjetas */
+.tipo-dni, .country-selector, .card { border-radius: var(--radius); box-shadow: none; }
+.result-card { border-top: 0; }
+.result-header { background: transparent; }
+
+/* tipo de DNI: control segmentado */
+.tipo-dni { background: transparent; border: 0; padding: 0; }
+.tipo-dni-label { margin-bottom: 8px; padding-left: 2px; }
+.tipo-dni-opciones { gap: 0; padding: 4px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
+.tipo-dni-btn { border: 0; background: transparent; border-radius: calc(var(--radius) - 4px); box-shadow: none !important; }
+.tipo-dni-btn.active { background: var(--accent); color: #14181f; }
+.tipo-dni-btn.active .tipo-dni-desc { color: rgba(20, 24, 31, .72); }
+
+/* cámara */
+.camera-hint { background: rgba(8, 14, 26, .72); border: 0; font-weight: 600; letter-spacing: 0; backdrop-filter: blur(4px); }
+.icon-btn { background: rgba(8, 14, 26, .62); border-color: rgba(255, 255, 255, .18); }
+.camera-actions { background: var(--panel); }
+.status-line { background: var(--panel); }
+.captura-estado { letter-spacing: 0; }
+
+/* ficha */
+.main-number-block { background: transparent; }
+.field { border-bottom-style: solid; }
+.field-label { color: var(--text-muted); }
+.raw-data summary { letter-spacing: 0; }
+
+/* panel del Registro dentro de la ficha */
+.registro-panel { background: var(--panel-2); border-top: 1px solid var(--line); }
+.reg-foto { background: transparent; }
+
+/* modales */
+.modal-content { border-top: 0; border-radius: var(--radius); }
+.modal-header { background: var(--panel); }
+.reg-tabs { background: var(--panel); }
+.reg-tabs button { font-weight: 700; }
+.toast { border-radius: var(--radius-sm); }
+
+/* ---------- barra de navegación de abajo ---------- */
+.reg-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 260; display: grid; grid-template-columns: repeat(4, 1fr);
+  height: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: var(--panel); border-top: 1px solid var(--line); }
+.reg-nav button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border: 0; background: none;
+  color: var(--text-muted); font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; position: relative; }
+.reg-nav button svg { width: 24px; height: 24px; }
+.reg-nav button[aria-current="page"] { color: var(--accent); }
+.reg-nav button[aria-current="page"]::before { content: ""; position: absolute; top: 0; left: 28%; right: 28%; height: 3px; border-radius: 0 0 3px 3px; background: var(--accent); }
+.reg-nav button:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; }
+body.con-nav { padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 8px); }
+body.con-nav .toast { bottom: calc(var(--nav-h) + 16px + env(safe-area-inset-bottom, 0px)); }
+/* con la barra de abajo, el botón Registro de arriba sobra */
+body.con-nav #btn-registro { display: none; }
+/* la barra se esconde en la cámara del reverso y en el visor de fotos (tienen sus propios botones abajo) */
+body:has(#modal-domicilio:not([hidden])) .reg-nav, body:has(.visor-foto:not([hidden])) .reg-nav { display: none; }
+/* el Registro deja lugar a la barra */
+@media (max-width: 640px) {
+  .reg-modal { bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px)); }
+  .reg-modal-content { padding-bottom: 0; }
+}
+@media (min-width: 641px) {
+  .reg-nav { left: 50%; right: auto; transform: translateX(-50%); width: min(560px, 100%); bottom: 12px; height: var(--nav-h); padding-bottom: 0; border: 1px solid var(--line); border-radius: 16px; }
+  body.con-nav { padding-bottom: calc(var(--nav-h) + 28px); }
+  .reg-modal { bottom: calc(var(--nav-h) + 20px); }
+}
+/* ficha: sin foto = una línea corta, no un recuadro vacío enorme */
+.reg-sin-foto { aspect-ratio: auto; min-height: 60px; font-size: 14.5px; }
+.reg-fotos-ficha figcaption { text-transform: none; letter-spacing: 0; font-weight: 700; font-size: 14px; order: -1; }
+.reg-fotos-ficha figure { display: flex; flex-direction: column; gap: 6px; }
+.chip-offline { text-transform: none !important; letter-spacing: 0 !important; }
