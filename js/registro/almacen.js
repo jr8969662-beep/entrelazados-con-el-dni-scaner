@@ -214,6 +214,16 @@ const Almacen = (() => {
     async entrar(url, usuario, clave) {
       cfg.url = String(url || '').trim().replace(/\/+$/, '');
       cfg.token = '';
+      // primero se comprueba que en esa dirección haya un servidor del Registro (si no, el error 405/404 no le dice nada a nadie)
+      let salud = null;
+      try { const r = await fetch(cfg.url + '/api/v1/salud', { cache: 'no-store' }); if (r.ok) salud = await r.json().catch(() => null); } catch (e) { salud = null; }
+      if (!salud || !salud.ok) {
+        const enGithub = /github\.io$/i.test(location.hostname);
+        const err = new Error(!cfg.url
+          ? (enGithub ? 'Esta página está en GitHub, no en el servidor. Escribí la dirección del servidor (por ejemplo, la de Render: https://…onrender.com).' : 'En esta dirección no hay un servidor del Registro. Escribí la dirección del servidor.')
+          : 'No se encontró el servidor del Registro en ' + cfg.url + '. Revisá la dirección; si el servidor estaba dormido, esperá un minuto y probá de nuevo.');
+        err.code = 'sin_servidor'; throw err;
+      }
       const r = await api('/sesion', { method: 'POST', json: { usuario, clave } });
       cfg = Object.assign(cfg, { modo: 'servidor', token: r.token, usuario: r.usuario, agente: (r.usuario && (r.usuario.nombre || r.usuario.usuario)) || usuario });
       guardarCfg(cfg);

@@ -14,6 +14,9 @@ services:
         value: "22.14.0"
       - key: SERVIR_APP
         value: "1"
+      # la app publicada en GitHub Pages también puede conectarse a este servidor
+      - key: ORIGENES
+        value: "https://jr8969662-beep.github.io"
       - key: CLAVE_DATOS
         generateValue: true
       - key: ADMIN_USUARIO
