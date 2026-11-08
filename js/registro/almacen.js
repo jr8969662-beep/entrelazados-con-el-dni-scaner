@@ -166,7 +166,13 @@ const Almacen = (() => {
     let r;
     try { r = await fetch(cfg.url.replace(/\/+$/, '') + '/api/v1' + ruta, { method: o.method || 'GET', headers: h, body: o.body }); }
     catch (e) { const err = new Error('No hay conexión con el servidor'); err.code = 'sin_conexion'; throw err; }
-    if (r.status === 401) { const err = new Error('La sesión venció: volvé a entrar'); err.code = 'sesion'; throw err; }
+    if (r.status === 401 && ruta === '/sesion') {   // al entrar: usuario o contraseña mal (no es una sesión vencida)
+      const err = new Error('Usuario o contraseña incorrectos. El usuario de prueba es "prueba" y la contraseña es la ADMIN_CLAVE que pusiste en Render.'); err.code = 'login'; throw err;
+    }
+    if (r.status === 401) {   // la sesión ya no vale (venció, o el servidor de prueba se reinició y se borró todo)
+      cfg.token = ''; guardarCfg(cfg);
+      const err = new Error('Tenés que volver a entrar: la sesión venció o el servidor se reinició. Andá a Ajustes → Entrar al servidor.'); err.code = 'sesion'; throw err;
+    }
     if (!r.ok) { let m = ''; try { m = (await r.json()).error; } catch (e) { /* nada */ } const err = new Error(m || ('Error del servidor (' + r.status + ')')); err.code = 'servidor'; throw err; }
     if (o.crudo) return r;
     return r.status === 204 ? null : r.json();
