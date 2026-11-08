@@ -344,3 +344,87 @@ body:has(#modal-domicilio:not([hidden])) .reg-nav, body:has(.visor-foto:not([hid
 .reg-fotos-ficha figcaption { text-transform: none; letter-spacing: 0; font-weight: 700; font-size: 14px; order: -1; }
 .reg-fotos-ficha figure { display: flex; flex-direction: column; gap: 6px; }
 .chip-offline { text-transform: none !important; letter-spacing: 0 !important; }
+
+/* ==========================================================
+   v5 — Más grande para el teléfono + "Pase a otro sistema" claro
+   ========================================================== */
+@media (max-width: 640px) {
+  body { font-size: 18px; }
+  :root { --nav-h: 74px; }
+  .reg-nav button { font-size: 14px; gap: 5px; }
+  .reg-nav button svg { width: 28px; height: 28px; }
+
+  .brand-text h1 { font-size: 20px; }
+  .tipo-dni-label { font-size: 16px; }
+  .tipo-dni-btn { min-height: 76px; }
+  .tipo-dni-nombre { font-size: 21px; }
+  .tipo-dni-desc { font-size: 15px; }
+  .camera-hint { font-size: 16px; }
+  .status-line { font-size: 16.5px; }
+  .btn { min-height: 58px; font-size: 17px; }
+  .btn-sm { min-height: 52px; font-size: 16px; }
+
+  .result-header h2 { font-size: 19px; }
+  .result-subtitle { font-size: 15px; }
+  .main-number-label { font-size: 15px; }
+  .main-number-value { font-size: clamp(40px, 12vw, 50px); }
+  .group-title { font-size: 16px; }
+  .field { padding: 13px 0; }
+  .field-label { font-size: 16px; }
+  .field-value { font-size: 19px; }
+  .btn-domicilio { min-height: 62px; font-size: 17px; }
+
+  .reg-donde, .reg-aviso, .reg-check { font-size: 16.5px; }
+  .reg-foto { min-height: 60px; font-size: 16.5px; }
+  .reg-campo { font-size: 15.5px; }
+  .reg-campo input, .reg-campo select, .reg-buscar, #reg-filtro, .reg-tramite select { min-height: 56px; font-size: 17.5px; }
+
+  .reg-tabs button { font-size: 16.5px; padding: 15px 14px; }
+  .reg-item { padding: 18px 16px; }
+  .reg-item-dni { font-size: 18px; }
+  .reg-item-nom { font-size: 18px; }
+  .reg-item-nom small { font-size: 15px; }
+  .reg-ident-dni { font-size: 36px; }
+  .reg-ident-nom { font-size: 26px; }
+  .reg-ident-sub { font-size: 16.5px; }
+  /* datos de la ficha: una columna, etiqueta arriba y dato grande abajo */
+  .reg-datos { grid-template-columns: 1fr 1fr; gap: 16px 14px; }
+  .reg-dato span { font-size: 15px; }
+  .reg-dato b { font-size: 19px; }
+  .reg-nota, .reg-sub { font-size: 15.5px; }
+  .reg-tramite { font-size: 17px; }
+  .reg-texto { font-size: 17.5px; }
+  .reg-tabla { font-size: 16.5px; }
+  .empty-state { font-size: 17px; }
+  .toast { font-size: 17px; }
+}
+
+/* ---------- Pase a otro sistema ---------- */
+.reg-pase { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel-2); scroll-margin-top: 12px; }
+.reg-pase-titulo { margin: 0; font-size: 20px; font-weight: 800; color: var(--text); }
+.reg-pase-intro { margin: 0; font-size: 16px; color: var(--text-secondary); line-height: 1.45; }
+.reg-pase-estado { padding: 12px 14px; border-radius: var(--radius-sm); font-size: 16px; font-weight: 700; line-height: 1.4; }
+.reg-pase-estado.ok { background: var(--ok-soft); color: var(--ok); }
+.reg-pase-estado.falta { background: rgba(242, 184, 75, .14); color: var(--warn); }
+.reg-pase-lista { display: grid; border: 1px solid var(--line); border-radius: var(--radius-sm); overflow: hidden; background: var(--panel); }
+.reg-pase-fila { display: grid; grid-template-columns: minmax(0, 40%) minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 56px; padding: 10px 14px;
+  border: 0; border-bottom: 1px solid var(--line-soft); background: none; color: var(--text); text-align: left; font: inherit; width: 100%; }
+.reg-pase-fila:last-child { border-bottom: 0; }
+button.reg-pase-fila { cursor: pointer; }
+button.reg-pase-fila:active { background: var(--accent-soft); }
+.reg-pase-k { font-size: 15px; color: var(--text-muted); }
+.reg-pase-v { font-size: 17.5px; font-weight: 700; overflow-wrap: anywhere; }
+.reg-pase-fila.vacia .reg-pase-v { color: var(--text-muted); font-weight: 400; }
+.reg-pase-copiar { font-size: 13px; font-weight: 800; color: var(--accent); padding: 6px 10px; border: 1px solid var(--accent); border-radius: 99px; }
+.reg-pase-botones { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.reg-pase-tecnico { justify-self: start; font-size: 15px; }
+.reg-pasos { margin: 0; padding-left: 22px; display: grid; gap: 10px; }
+.reg-pasos li { line-height: 1.45; }
+.reg-detalle { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 12px 14px; background: var(--panel-2); }
+.reg-detalle summary { cursor: pointer; font-weight: 700; color: var(--text-secondary); }
+.reg-detalle[open] { display: grid; gap: 10px; }
+@media (max-width: 420px) {
+  .reg-pase-fila { grid-template-columns: minmax(0, 1fr) auto; }
+  .reg-pase-k { grid-column: 1 / -1; font-size: 14.5px; margin-bottom: -6px; }
+  .reg-pase-botones { grid-template-columns: 1fr; }
+}

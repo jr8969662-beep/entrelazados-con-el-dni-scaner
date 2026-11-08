@@ -187,7 +187,7 @@
           <button type="button" role="tab" data-v="personas">Personas</button>
           <button type="button" role="tab" data-v="tramites">Trámites</button>
           <button type="button" role="tab" data-v="actividad">Actividad</button>
-          <button type="button" role="tab" data-v="sistemas">Otros sistemas</button>
+          <button type="button" role="tab" data-v="sistemas">Pase a sistemas</button>
           <button type="button" role="tab" data-v="ajustes">Ajustes</button>
         </nav>
         <div class="modal-body reg-cuerpo" id="reg-cuerpo"></div>
@@ -257,7 +257,7 @@
       <div class="reg-pad reg-ficha">
         <div class="reg-fila"><button type="button" class="btn btn-secondary btn-sm" data-acc="volver">← Personas</button>
           <span class="reg-spacer"></span>
-          <button type="button" class="btn btn-secondary btn-sm" data-acc="json">Datos para otros sistemas</button></div>
+          <button type="button" class="btn btn-secondary btn-sm" data-acc="ir-pase">Pase a otro sistema</button></div>
         <div class="reg-ident">
           <div class="reg-ident-dni">${esc(dniPts(p.dni))}</div>
           <div class="reg-ident-nom">${esc(p.apellido || '')}, ${esc(p.nombre || '')}</div>
@@ -287,7 +287,7 @@
           <button type="submit" class="btn btn-primary btn-sm">Iniciar trámite</button>
         </form>` : ''}
         ${Almacen.rol() === 'responsable' ? `<div class="reg-borrar"><button type="button" class="btn btn-secondary btn-sm" data-acc="borrar">Borrar esta ficha</button><span id="reg-conf-borrar" hidden>¿Seguro? Se borran sus datos, fotos y trámites. <button type="button" class="btn btn-sm reg-btn-peligro" data-acc="borrar-si">Sí, borrar</button></span></div>` : ''}
-        <pre class="reg-json" id="reg-json" hidden></pre>
+        ${tarjetaPase(p)}
       </div>`;
     c.dataset.ficha = JSON.stringify(Almacen.fichaParaSistemas(p));
     c.querySelectorAll('[data-foto]').forEach(async (fig) => {
@@ -298,6 +298,69 @@
         fig.querySelector('.reg-sin-foto').outerHTML = `<button type="button" class="reg-foto-btn" data-ver="${esc(u)}"><img src="${esc(u)}" alt="${esc(fig.querySelector('figcaption').textContent)} del DNI"></button>`;
       } catch (e) { /* queda "sin foto" */ }
     });
+  }
+
+
+  // ---------- Pase a otro sistema: qué datos salen, claros y listos para copiar ----------
+  function filasPase(f) {
+    if (!f) return [];
+    const d = f.documento || {};
+    return [
+      ['DNI', dniPts(f.dni)], ['Apellido', f.apellido], ['Nombre', f.nombre], ['Sexo', f.sexo],
+      ['Fecha de nacimiento', f.fechaNacimiento ? fecha(f.fechaNacimiento) : ''], ['Nacionalidad', f.nacionalidad],
+      ['Lugar de nacimiento', f.lugarNacimiento], ['Domicilio', f.domicilio], ['CUIL', f.cuil], ['Teléfono', f.telefono],
+      ['Tipo de DNI', d.version === 'viejo' ? 'DNI viejo' : d.version === 'nuevo' ? 'DNI nuevo' : ''], ['Ejemplar', d.ejemplar],
+      ['N° de trámite del DNI', d.tramite], ['Emisión', d.emision ? fecha(d.emision) : ''], ['Vencimiento', d.vencimiento ? fecha(d.vencimiento) : '']
+    ];
+  }
+  function textoPase(f) {
+    if (!f) return '';
+    const l = filasPase(f).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`);
+    if ((f.tramites || []).length) l.push('Trámites: ' + f.tramites.map((t) => `${t.tipo} (${t.estado}, ${fecha(t.fecha)})`).join('; '));
+    return l.join('\n');
+  }
+  function tarjetaPase(p) {
+    const f = Almacen.fichaParaSistemas(p);
+    const filas = filasPase(f);
+    const faltan = filas.filter(([k, v]) => !v && ['Sexo', 'Fecha de nacimiento', 'Domicilio', 'CUIL'].includes(k)).map(([k]) => k);
+    if (!f.fotos.frente) faltan.push('foto del frente');
+    if (!f.fotos.reverso) faltan.push('foto del reverso');
+    const fila = (k, v) => v
+      ? `<button type="button" class="reg-pase-fila" data-acc="copiar-campo" data-campo="${esc(k)}" data-valor="${esc(v)}"><span class="reg-pase-k">${esc(k)}</span><span class="reg-pase-v">${esc(v)}</span><span class="reg-pase-copiar" aria-hidden="true">Copiar</span></button>`
+      : `<div class="reg-pase-fila vacia"><span class="reg-pase-k">${esc(k)}</span><span class="reg-pase-v">—</span></div>`;
+    return `
+      <section class="reg-pase" id="reg-pase" aria-labelledby="reg-pase-t">
+        <h3 class="reg-pase-titulo" id="reg-pase-t">Pase a otro sistema</h3>
+        <p class="reg-pase-intro">Estos son los datos que recibe otro sistema al pedir este DNI. Tocá un dato para copiarlo, o copiá todos juntos.</p>
+        <div class="reg-pase-estado ${faltan.length ? 'falta' : 'ok'}">${faltan.length ? 'Falta: ' + esc(faltan.join(', ')) : 'Ficha completa: datos y las dos fotos'}</div>
+        <div class="reg-pase-lista">${filas.map(([k, v]) => fila(k, v)).join('')}
+          <div class="reg-pase-fila"><span class="reg-pase-k">Fotos del DNI</span><span class="reg-pase-v">${f.fotos.frente ? 'Frente ✓' : 'Frente —'} · ${f.fotos.reverso ? 'Reverso ✓' : 'Reverso —'}</span></div>
+          <div class="reg-pase-fila"><span class="reg-pase-k">Trámites</span><span class="reg-pase-v">${(f.tramites || []).length}</span></div>
+        </div>
+        <div class="reg-pase-botones">
+          <button type="button" class="btn btn-primary" data-acc="copiar-todo">Copiar todos los datos</button>
+          <button type="button" class="btn btn-secondary" data-acc="descargar">Descargar ficha</button>
+        </div>
+        <button type="button" class="reg-link reg-pase-tecnico" data-acc="json">Ver formato técnico (JSON)</button>
+        <pre class="reg-json" id="reg-json" hidden></pre>
+      </section>`;
+  }
+  async function copiar(texto, aviso) {
+    try { await navigator.clipboard.writeText(texto); toast(aviso, 'success'); }
+    catch (e) {
+      const t = document.createElement('textarea'); t.value = texto; t.setAttribute('readonly', ''); t.style.position = 'fixed'; t.style.opacity = '0';
+      document.body.appendChild(t); t.select();
+      try { document.execCommand('copy'); toast(aviso, 'success'); } catch (e2) { toast('No se pudo copiar', 'error'); }
+      t.remove();
+    }
+  }
+  function descargarFicha(f) {
+    if (!f) return;
+    const b = new Blob([JSON.stringify(f, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'ficha-' + f.dni + '.json';
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    Almacen.auditar('Descargó la ficha', f.dni);
+    toast('Ficha descargada', 'success');
   }
 
   async function pintarTramites() {
@@ -332,13 +395,29 @@
     const c = $('#reg-cuerpo');
     let ejemplo = 'Todavía no hay personas en el Registro.';
     try { const l = await Almacen.personas(''); if (l.length) ejemplo = JSON.stringify(Almacen.fichaParaSistemas(await Almacen.persona(l[0].dni)), null, 2); } catch (e) { /* nada */ }
+    const conServidor = Almacen.modo() === 'servidor' && Almacen.conectado();
     c.innerHTML = `<div class="reg-pad reg-texto">
-      <p>Cada persona está una sola vez, identificada por su DNI, con sus datos, las fotos del documento y todos sus trámites. Con el servidor de la carpeta <span class="mono">servidor/</span>, otro sistema autorizado pide la ficha así:</p>
-      <pre class="reg-json">GET https://&lt;servidor&gt;/api/v1/personas/{dni}
+      <h3 class="reg-pase-titulo">Pase de datos a otros sistemas</h3>
+      <div class="reg-pase-estado ${conServidor ? 'ok' : 'falta'}">${conServidor ? 'Conectado al servidor: los sistemas autorizados ya pueden pedir las fichas.' : 'Ahora las fichas están solo en este equipo. Para que otros sistemas las pidan solos hace falta el servidor (Ajustes).'}</div>
+      <ol class="reg-pasos">
+        <li><b>El otro sistema pide un DNI.</b> Por ejemplo, el de certificados, cuando el agente escribe el número.</li>
+        <li><b>El Registro le devuelve la ficha:</b> datos, fotos del DNI y trámites anteriores.</li>
+        <li><b>El otro sistema completa su formulario</b> con esos datos y muestra la foto para controlar a la persona.</li>
+        <li><b>Queda anotado</b> qué sistema pidió qué DNI y a qué hora.</li>
+      </ol>
+      <h4>Qué datos se pasan</h4>
+      <div class="reg-pase-lista">
+        ${[['DNI', 'Número, sin puntos'], ['Apellido y nombre', 'Como figuran en el DNI'], ['Sexo y fecha de nacimiento', ''], ['Nacionalidad y lugar de nacimiento', ''], ['Domicilio y CUIL', 'Del reverso del DNI'], ['Teléfono', 'Si se cargó'], ['Datos del DNI', 'Viejo o nuevo, ejemplar, trámite, emisión, vencimiento'], ['Fotos del DNI', 'Frente y reverso'], ['Trámites', 'Tipo, estado y fecha de cada uno']].map(([k, v]) => `<div class="reg-pase-fila"><span class="reg-pase-k">${k}</span><span class="reg-pase-v">${v || '—'}</span></div>`).join('')}
+      </div>
+      <p class="reg-sub">Mientras no haya servidor, desde cada ficha (Personas → elegir persona → <b>Pase a otro sistema</b>) podés copiar los datos para pegarlos en otro sistema.</p>
+      <details class="reg-detalle">
+        <summary>Detalle técnico para el área de sistemas</summary>
+        <p>El otro sistema pide la ficha al servidor (carpeta <span class="mono">servidor/</span>) con su clave:</p>
+        <pre class="reg-json">GET https://&lt;servidor&gt;/api/v1/personas/{dni}
 Authorization: Bearer &lt;clave del sistema&gt;</pre>
-      <p>Y recibe esto (ejemplo con la primera persona del Registro):</p>
-      <pre class="reg-json">${esc(ejemplo)}</pre>
-      <p class="reg-sub">Las fotos se piden aparte, con la misma clave, en la dirección que trae cada una. Cada consulta queda en el registro de actividad.</p>
+        <p>Y recibe esto (ejemplo con la primera persona del Registro):</p>
+        <pre class="reg-json">${esc(ejemplo)}</pre>
+      </details>
     </div>`;
   }
 
@@ -373,7 +452,11 @@ Authorization: Bearer &lt;clave del sistema&gt;</pre>
     const b = ev.target.closest('[data-acc]'); if (!b) return;
     const acc = b.dataset.acc;
     if (acc === 'volver') { fichaDni = null; vista = 'personas'; pintar(); }
-    if (acc === 'json') { const pre = $('#reg-json'); pre.textContent = JSON.stringify(JSON.parse($('#reg-cuerpo').dataset.ficha || 'null'), null, 2); pre.hidden = !pre.hidden; }
+    if (acc === 'ir-pase') { const t = $('#reg-pase'); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    if (acc === 'json') { const pre = $('#reg-json'); pre.textContent = JSON.stringify(JSON.parse($('#reg-cuerpo').dataset.ficha || 'null'), null, 2); pre.hidden = !pre.hidden; b.textContent = pre.hidden ? 'Ver formato técnico (JSON)' : 'Ocultar formato técnico'; }
+    if (acc === 'copiar-todo') copiar(textoPase(JSON.parse($('#reg-cuerpo').dataset.ficha || 'null')), 'Datos copiados');
+    if (acc === 'copiar-campo') copiar(b.dataset.valor, 'Copiado: ' + b.dataset.campo);
+    if (acc === 'descargar') descargarFicha(JSON.parse($('#reg-cuerpo').dataset.ficha || 'null'));
     if (acc === 'borrar') $('#reg-conf-borrar').hidden = false;
     if (acc === 'borrar-si') { try { await Almacen.borrarPersona(fichaDni); toast('Ficha borrada', 'success'); fichaDni = null; vista = 'personas'; pintar(); } catch (e) { toast(e.message, 'error'); } }
     if (acc === 'salir') { Almacen.salir(); toast('Sesión cerrada', 'success'); pintar(); }

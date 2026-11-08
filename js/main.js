@@ -449,7 +449,8 @@
     if (typeof VisorFoto === 'undefined') return;
     try {
       if (VisorFoto.setPrefijo) VisorFoto.setPrefijo('DNI_' + ((ultimoResultado && (ultimoResultado.dni || ultimoResultado.numero)) || 'documento'));
-      VisorFoto.actualizarFicha({ frente: ultimaFotoDataUrl, reverso: ultimaFotoReversoUrl });
+      // (la foto del QR del DNI nuevo es del reverso: no se muestra como 'Frente')
+      VisorFoto.actualizarFicha({ frente: ladoFoto === 'frente' ? ultimaFotoDataUrl : null, reverso: ultimaFotoReversoUrl || (ladoFoto === 'reverso' ? ultimaFotoDataUrl : null) });
     } catch (e) { /* nada */ }
     try { window.dispatchEvent(new CustomEvent('dni:fotos')); } catch (e) { /* nada */ }
   }
