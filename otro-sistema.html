@@ -47,7 +47,7 @@
   <section class="caja">
     <h2>1. Conexión con el Registro</h2>
     <label>Clave de este sistema
-      <input id="clave" type="password" autocomplete="off" placeholder="La SISTEMA_CLAVE del servidor">
+      <input id="clave" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="La SISTEMA_CLAVE del servidor">
     </label>
     <details>
       <summary>El Registro está en otro servidor</summary>
@@ -100,14 +100,14 @@
   async function foto(id, caja) {
     if (!id) { ponerCaja(caja, '<div class="sinfoto">Sin foto</div>'); return; }
     try {
-      const r = await fetch(base() + '/fotos/' + encodeURIComponent(id), { headers: { Authorization: 'Bearer ' + $('clave').value.trim() } });
+      const r = await fetch(base() + '/fotos/' + encodeURIComponent(id), { headers: { Authorization: 'Bearer ' + $('clave').value.trim().replace(/^["'`]+|["'`]+$/g, '') } });
       if (!r.ok) throw new Error();
       const u = URL.createObjectURL(await r.blob());
       ponerCaja(caja, `<img src="${u}" alt="Foto del DNI">`);
     } catch (e) { ponerCaja(caja, '<div class="sinfoto">No se pudo traer la foto</div>'); }
   }
   async function buscar() {
-    const dni = $('dni').value.replace(/\D/g, ''), clave = $('clave').value.trim();
+    const dni = $('dni').value.replace(/\D/g, ''), clave = $('clave').value.trim().replace(/^["'`]+|["'`]+$/g, '');
     $('resultado').hidden = true;
     if (!clave) return aviso('Falta la clave de este sistema.', 'err');
     if (!/^\d{7,8}$/.test(dni)) return aviso('El DNI tiene que tener 7 u 8 números.', 'err');
