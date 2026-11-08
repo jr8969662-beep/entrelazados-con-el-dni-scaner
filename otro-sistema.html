@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Otro sistema (prueba)</title>
+<meta name="robots" content="noindex">
+<style>
+  /* Página de PRUEBA que hace de "otro sistema": pide una ficha al servidor del Registro por DNI y completa su formulario. */
+  :root { --bg: #f2f4f7; --panel: #fff; --line: #d6dbe3; --text: #18202e; --muted: #5b6678; --acc: #0f6e5c; --acc-soft: #e2f3ef; --err: #b42318; --err-soft: #fde8e6; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #0e1319; --panel: #161d26; --line: #2a3443; --text: #e6ebf2; --muted: #9aa6b8; --acc: #3fc0a3; --acc-soft: #12302a; --err: #f08a80; --err-soft: #331614; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 18px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { background: var(--acc); color: #fff; padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 16px; }
+  header h1 { margin: 0; font-size: 22px; }
+  header p { margin: 4px 0 0; font-size: 15px; opacity: .9; }
+  main { max-width: 720px; margin: 0 auto; padding: 16px; display: grid; gap: 16px; }
+  .caja { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: grid; gap: 12px; }
+  h2 { margin: 0; font-size: 19px; }
+  label { display: grid; gap: 6px; font-size: 16px; font-weight: 700; }
+  input { width: 100%; min-height: 54px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--text); font: inherit; font-size: 18px; }
+  input[readonly] { background: var(--bg); }
+  button { min-height: 56px; padding: 0 20px; border: 0; border-radius: 10px; background: var(--acc); color: #fff; font: inherit; font-size: 18px; font-weight: 700; cursor: pointer; }
+  button:disabled { opacity: .6; }
+  .fila { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end; }
+  .grilla { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .ancho { grid-column: 1 / -1; }
+  .aviso { padding: 12px 14px; border-radius: 10px; font-size: 16px; font-weight: 600; }
+  .aviso.ok { background: var(--acc-soft); color: var(--acc); }
+  .aviso.err { background: var(--err-soft); color: var(--err); }
+  .fotos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .fotos figure { margin: 0; display: grid; gap: 4px; }
+  .fotos img { width: 100%; aspect-ratio: 1.586; object-fit: contain; background: #000; border-radius: 8px; border: 1px solid var(--line); }
+  .fotos figcaption, .sub { font-size: 15px; color: var(--muted); }
+  .sinfoto { aspect-ratio: 1.586; display: grid; place-items: center; border: 1px dashed var(--line); border-radius: 8px; color: var(--muted); font-size: 15px; }
+  ul { margin: 0; padding-left: 20px; }
+  details summary { cursor: pointer; color: var(--muted); font-size: 16px; }
+  @media (max-width: 520px) { .grilla, .fotos { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Sistema de certificados (prueba)</h1>
+  <p>Página de ejemplo que hace de "otro sistema": pide la ficha al Registro DNI por número de DNI.</p>
+</header>
+<main>
+  <section class="caja">
+    <h2>1. Conexión con el Registro</h2>
+    <label>Clave de este sistema
+      <input id="clave" type="password" autocomplete="off" placeholder="La SISTEMA_CLAVE del servidor">
+    </label>
+    <details>
+      <summary>El Registro está en otro servidor</summary>
+      <label style="margin-top:10px">Dirección del servidor del Registro
+        <input id="url" type="url" placeholder="Vacío = este mismo servidor">
+      </label>
+    </details>
+  </section>
+
+  <section class="caja">
+    <h2>2. Buscar a la persona</h2>
+    <div class="fila">
+      <label>Número de DNI<input id="dni" inputmode="numeric" maxlength="10" placeholder="32456789"></label>
+      <button id="buscar" type="button">Buscar</button>
+    </div>
+    <div id="aviso" class="aviso" hidden></div>
+  </section>
+
+  <section class="caja" id="resultado" hidden>
+    <h2>3. Certificado: datos traídos del Registro</h2>
+    <div class="fotos">
+      <figure><div id="f-frente" class="sinfoto">Sin foto del frente</div><figcaption>Frente del DNI</figcaption></figure>
+      <figure><div id="f-reverso" class="sinfoto">Sin foto del reverso</div><figcaption>Reverso del DNI</figcaption></figure>
+    </div>
+    <div class="grilla">
+      <label>Apellido<input id="c-apellido" readonly></label>
+      <label>Nombre<input id="c-nombre" readonly></label>
+      <label>DNI<input id="c-dni" readonly></label>
+      <label>Fecha de nacimiento<input id="c-nac" readonly></label>
+      <label class="ancho">Domicilio<input id="c-dom" readonly></label>
+      <label>CUIL<input id="c-cuil" readonly></label>
+      <label>Vencimiento del DNI<input id="c-ven" readonly></label>
+    </div>
+    <div>
+      <strong>Trámites anteriores</strong>
+      <ul id="tramites" class="sub"></ul>
+    </div>
+    <p class="sub">Esta consulta quedó anotada en el registro de actividad del Registro DNI.</p>
+  </section>
+</main>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const fecha = (iso) => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || ''); return m ? `${m[3]}/${m[2]}/${m[1]}` : (iso || ''); };
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  try { $('clave').value = localStorage.getItem('otro_clave') || ''; $('url').value = localStorage.getItem('otro_url') || ''; } catch (e) { /* nada */ }
+  const base = () => ($('url').value.trim().replace(/\/+$/, '')) + '/api/v1';
+  const aviso = (t, c) => { const a = $('aviso'); a.textContent = t; a.className = 'aviso ' + c; a.hidden = !t; };
+  function ponerCaja(caja, html) { const el = $(caja); const d = document.createElement('div'); d.innerHTML = html; d.firstElementChild.id = caja; el.replaceWith(d.firstElementChild); }
+  async function foto(id, caja) {
+    if (!id) { ponerCaja(caja, '<div class="sinfoto">Sin foto</div>'); return; }
+    try {
+      const r = await fetch(base() + '/fotos/' + encodeURIComponent(id), { headers: { Authorization: 'Bearer ' + $('clave').value.trim() } });
+      if (!r.ok) throw new Error();
+      const u = URL.createObjectURL(await r.blob());
+      ponerCaja(caja, `<img src="${u}" alt="Foto del DNI">`);
+    } catch (e) { ponerCaja(caja, '<div class="sinfoto">No se pudo traer la foto</div>'); }
+  }
+  async function buscar() {
+    const dni = $('dni').value.replace(/\D/g, ''), clave = $('clave').value.trim();
+    $('resultado').hidden = true;
+    if (!clave) return aviso('Falta la clave de este sistema.', 'err');
+    if (!/^\d{7,8}$/.test(dni)) return aviso('El DNI tiene que tener 7 u 8 números.', 'err');
+    try { localStorage.setItem('otro_clave', clave); localStorage.setItem('otro_url', $('url').value.trim()); } catch (e) { /* nada */ }
+    $('buscar').disabled = true; aviso('Pidiendo la ficha al Registro…', 'ok');
+    try {
+      let r;
+      try { r = await fetch(base() + '/personas/' + dni, { headers: { Authorization: 'Bearer ' + clave } }); }
+      catch (e) { throw new Error('No hay conexión con el servidor del Registro.'); }
+      if (r.status === 401) throw new Error('La clave no es válida.');
+      if (r.status === 404) throw new Error('Ese DNI no está en el Registro.');
+      if (!r.ok) throw new Error('El servidor respondió con error ' + r.status + '.');
+      const p = await r.json();
+      $('c-apellido').value = p.apellido || ''; $('c-nombre').value = p.nombre || '';
+      $('c-dni').value = String(p.dni).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      $('c-nac').value = fecha(p.fechaNacimiento); $('c-dom').value = p.domicilio || ''; $('c-cuil').value = p.cuil || ''; $('c-ven').value = fecha(p.fechaVencimiento);
+      $('tramites').innerHTML = (p.tramites || []).length ? p.tramites.map((t) => `<li>${esc(t.tipo)} · ${esc(t.estado)} · ${esc(fecha(t.fecha))}</li>`).join('') : '<li>Ninguno</li>';
+      ponerCaja('f-frente', '<div class="sinfoto">Cargando…</div>'); ponerCaja('f-reverso', '<div class="sinfoto">Cargando…</div>');
+      $('resultado').hidden = false;
+      aviso('Ficha recibida del Registro.', 'ok');
+      foto(p.fotos && p.fotos.frente, 'f-frente');
+      foto(p.fotos && p.fotos.reverso, 'f-reverso');
+    } catch (e) { aviso(e.message, 'err'); } finally { $('buscar').disabled = false; }
+  }
+  $('buscar').addEventListener('click', buscar);
+  $('dni').addEventListener('keydown', (ev) => { if (ev.key === 'Enter') buscar(); });
+})();
+</script>
+</body>
+</html>

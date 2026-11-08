@@ -1,0 +1,28 @@
+# Servidor de PRUEBA del Registro DNI en Render (plan gratis).
+# Ojo: en el plan gratis los datos se borran cuando el servidor se duerme (15 minutos sin uso) o se reinicia.
+# Sirve para probar el pase de datos, no para guardar fichas de verdad.
+services:
+  - type: web
+    name: registro-dni-prueba
+    runtime: node
+    plan: free
+    buildCommand: "echo sin dependencias"
+    startCommand: "node servidor/servidor.js"
+    healthCheckPath: /api/v1/salud
+    envVars:
+      - key: NODE_VERSION
+        value: "22.14.0"
+      - key: SERVIR_APP
+        value: "1"
+      - key: CLAVE_DATOS
+        generateValue: true
+      - key: ADMIN_USUARIO
+        value: "prueba"
+      - key: ADMIN_NOMBRE
+        value: "Agente de prueba"
+      - key: ADMIN_CLAVE
+        sync: false
+      - key: SISTEMA_CLAVE
+        sync: false
+      - key: SISTEMA_NOMBRE
+        value: "Sistema de certificados (prueba)"

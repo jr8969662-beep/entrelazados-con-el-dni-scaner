@@ -447,7 +447,7 @@ Authorization: Bearer &lt;clave del sistema&gt;</pre>
         <summary>${enServidor ? 'Entrar al servidor' : 'Conectar a un servidor'}</summary>
         <p class="reg-ayuda">Solo cuando la institución tenga el servidor instalado: el área de sistemas te da la dirección, el usuario y la contraseña.</p>
         <form class="reg-ajuste" data-form="servidor">
-          <label class="reg-campo"><span>Dirección del servidor</span><input id="reg-url" type="url" value="${esc(cfg.url)}" placeholder="https://registro.ejemplo.gob.ar" autocomplete="url"></label>
+          <label class="reg-campo"><span>Dirección del servidor</span><input id="reg-url" type="url" value="${esc(cfg.url)}" placeholder="Vacío si la app se abrió desde el servidor" autocomplete="url"></label>
           <label class="reg-campo"><span>Usuario</span><input id="reg-usuario" autocomplete="username"></label>
           <label class="reg-campo"><span>Contraseña</span><input id="reg-clave" type="password" autocomplete="current-password"></label>
           <button type="submit" class="btn btn-primary reg-ancho-btn">Entrar</button>

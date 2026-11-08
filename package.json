@@ -1,0 +1,12 @@
+{
+  "name": "registro-dni",
+  "version": "7.0.0",
+  "private": true,
+  "description": "Registro DNI: escáner del DNI + fichas por persona con fotos y trámites. El servidor está en servidor/.",
+  "scripts": {
+    "start": "node servidor/servidor.js"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}

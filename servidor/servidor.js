@@ -25,9 +25,12 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { DatabaseSync } = require('node:sqlite');
 
-const PUERTO = +(process.env.PUERTO || 8080);
+const PUERTO = +(process.env.PUERTO || process.env.PORT || 8080);
 const DATOS = path.resolve(process.env.DATOS || path.join(__dirname, 'datos'));
-const CLAVE = process.env.CLAVE_DATOS && /^[0-9a-f]{64}$/i.test(process.env.CLAVE_DATOS) ? Buffer.from(process.env.CLAVE_DATOS, 'hex') : null;
+// 64 caracteres hexadecimales = la clave tal cual; cualquier otro texto largo se convierte en clave con SHA-256
+const CLAVE = !process.env.CLAVE_DATOS ? null
+  : /^[0-9a-f]{64}$/i.test(process.env.CLAVE_DATOS) ? Buffer.from(process.env.CLAVE_DATOS, 'hex')
+  : process.env.CLAVE_DATOS.length >= 16 ? crypto.createHash('sha256').update(process.env.CLAVE_DATOS).digest() : null;
 const ORIGENES = String(process.env.ORIGENES || '').split(',').map((s) => s.trim().replace(/\/+$/, '')).filter(Boolean);
 const HORAS_SESION = +(process.env.HORAS_SESION || 12);
 const RAIZ_APP = path.resolve(__dirname, '..');
@@ -327,7 +330,25 @@ const servidor = http.createServer(async (req, res) => {
   }
 });
 
+// Arranque sin consola (servidores de prueba en la nube): el primer usuario y una clave de sistema salen de variables de entorno.
+//   ADMIN_USUARIO / ADMIN_CLAVE / ADMIN_NOMBRE  -> crea (o actualiza la contraseña de) un usuario responsable
+//   SISTEMA_CLAVE / SISTEMA_NOMBRE             -> clave de solo lectura para un "otro sistema" de prueba
+function arranqueDesdeEntorno() {
+  const u = String(process.env.ADMIN_USUARIO || '').trim().toLowerCase(), c = process.env.ADMIN_CLAVE || '';
+  if (u && c.length >= 10) {
+    const sal = crypto.randomBytes(16).toString('hex'), hash = hashClave(c, sal);
+    if (db.prepare('SELECT 1 FROM usuarios WHERE usuario = ?').get(u)) db.prepare('UPDATE usuarios SET sal = ?, hash = ?, activo = 1 WHERE usuario = ?').run(sal, hash, u);
+    else db.prepare('INSERT INTO usuarios (usuario, nombre, rol, sal, hash, activo, creado) VALUES (?, ?, ?, ?, ?, 1, ?)').run(u, process.env.ADMIN_NOMBRE || u, 'responsable', sal, hash, ahora());
+  } else if (u) console.log('AVISO: ADMIN_CLAVE tiene que tener al menos 10 caracteres.');
+  const k = process.env.SISTEMA_CLAVE || '';
+  if (k.length >= 16) {
+    const h = sha256(k);
+    if (!db.prepare('SELECT 1 FROM claves_sistema WHERE clave_hash = ?').get(h)) db.prepare('INSERT INTO claves_sistema (clave_hash, nombre, activo, creado) VALUES (?, ?, 1, ?)').run(h, process.env.SISTEMA_NOMBRE || 'Sistema de prueba', ahora());
+  } else if (k) console.log('AVISO: SISTEMA_CLAVE tiene que tener al menos 16 caracteres.');
+}
+
 if (require.main === module) {
+  arranqueDesdeEntorno();
   servidor.listen(PUERTO, () => {
     const n = db.prepare('SELECT COUNT(*) AS n FROM usuarios').get().n;
     console.log(`Registro DNI escuchando en el puerto ${PUERTO} · datos en ${DATOS}`);
