@@ -423,24 +423,37 @@ Authorization: Bearer &lt;clave del sistema&gt;</pre>
 
   function pintarAjustes() {
     const c = $('#reg-cuerpo'), cfg = Almacen.config();
-    c.innerHTML = `<div class="reg-pad reg-texto">
-      <h3 class="reg-h3">Dónde se guardan las fichas</h3>
-      <p>Ahora: <b>${cfg.modo === 'servidor' ? 'en el servidor ' + esc(cfg.url) + (Almacen.conectado() ? ', como ' + esc(cfg.agente) + ' (' + esc(Almacen.rol()) + ')' : ', sin sesión') : 'en este equipo (modo de prueba)'}</b>.</p>
-      <form class="reg-ajuste" data-form="local">
-        <h4>En este equipo (prueba)</h4>
-        <p class="reg-sub">Las fichas quedan solo en este celular o navegador. Sirve para probar; no lo uses con datos reales de otras personas.</p>
-        <label class="reg-campo"><span>Tu nombre (queda en cada carga)</span><input id="reg-agente" value="${esc(cfg.modo === 'local' ? cfg.agente : '')}" autocomplete="name"></label>
-        <button type="submit" class="btn btn-secondary btn-sm">Usar este equipo</button>
-      </form>
-      <form class="reg-ajuste" data-form="servidor">
-        <h4>Servidor de la institución</h4>
-        <p class="reg-sub">Con el servidor instalado (carpeta <span class="mono">servidor/</span> del proyecto), las fichas quedan en un solo lugar para todos los agentes.</p>
-        <label class="reg-campo"><span>Dirección del servidor</span><input id="reg-url" type="url" value="${esc(cfg.url)}" placeholder="https://registro.ejemplo.gob.ar" autocomplete="url"></label>
-        <label class="reg-campo"><span>Usuario</span><input id="reg-usuario" autocomplete="username"></label>
-        <label class="reg-campo"><span>Contraseña</span><input id="reg-clave" type="password" autocomplete="current-password"></label>
-        <div class="reg-fila"><button type="submit" class="btn btn-primary btn-sm">Entrar</button>${cfg.modo === 'servidor' && Almacen.conectado() ? '<button type="button" class="btn btn-secondary btn-sm" data-acc="salir">Cerrar sesión</button>' : ''}</div>
-        <p class="reg-error" id="reg-err-srv" hidden></p>
-      </form>
+    const enServidor = cfg.modo === 'servidor';
+    const nombre = enServidor ? (cfg.agente || '') : (cfg.agente || '');
+    c.innerHTML = `<div class="reg-pad reg-ajustes">
+      <div class="reg-ahora ${enServidor && Almacen.conectado() ? 'srv' : ''}">
+        <span class="reg-ahora-k">Las fichas se guardan</span>
+        <span class="reg-ahora-v">${enServidor ? (Almacen.conectado() ? 'en el servidor' : 'en el servidor (sin sesión)') : 'en este celular'}</span>
+        <span class="reg-ahora-sub">${enServidor ? (Almacen.conectado() ? 'Como ' + esc(cfg.agente) + ' · ' + esc(Almacen.rol()) : 'Entrá con tu usuario para seguir') : 'Modo de prueba: no salen de este equipo'}</span>
+      </div>
+
+      ${enServidor ? `
+        ${Almacen.conectado() ? '<button type="button" class="btn btn-secondary reg-ancho-btn" data-acc="salir">Cerrar sesión</button>' : ''}
+        <button type="button" class="btn btn-secondary reg-ancho-btn" data-acc="volver-local">Volver a guardar en este celular</button>
+      ` : `
+        <form class="reg-ajuste" data-form="local">
+          <label class="reg-campo"><span>Tu nombre</span><input id="reg-agente" value="${esc(nombre)}" placeholder="Ej.: Cabo Pérez" autocomplete="name"></label>
+          <p class="reg-ayuda">Queda anotado en cada ficha y trámite que cargues.</p>
+          <button type="submit" class="btn btn-primary reg-ancho-btn">Guardar nombre</button>
+        </form>
+      `}
+
+      <details class="reg-servidor" ${enServidor && !Almacen.conectado() ? 'open' : ''}>
+        <summary>${enServidor ? 'Entrar al servidor' : 'Conectar a un servidor'}</summary>
+        <p class="reg-ayuda">Solo cuando la institución tenga el servidor instalado: el área de sistemas te da la dirección, el usuario y la contraseña.</p>
+        <form class="reg-ajuste" data-form="servidor">
+          <label class="reg-campo"><span>Dirección del servidor</span><input id="reg-url" type="url" value="${esc(cfg.url)}" placeholder="https://registro.ejemplo.gob.ar" autocomplete="url"></label>
+          <label class="reg-campo"><span>Usuario</span><input id="reg-usuario" autocomplete="username"></label>
+          <label class="reg-campo"><span>Contraseña</span><input id="reg-clave" type="password" autocomplete="current-password"></label>
+          <button type="submit" class="btn btn-primary reg-ancho-btn">Entrar</button>
+          <p class="reg-error" id="reg-err-srv" hidden></p>
+        </form>
+      </details>
     </div>`;
   }
 
@@ -460,6 +473,7 @@ Authorization: Bearer &lt;clave del sistema&gt;</pre>
     if (acc === 'borrar') $('#reg-conf-borrar').hidden = false;
     if (acc === 'borrar-si') { try { await Almacen.borrarPersona(fichaDni); toast('Ficha borrada', 'success'); fichaDni = null; vista = 'personas'; pintar(); } catch (e) { toast(e.message, 'error'); } }
     if (acc === 'salir') { Almacen.salir(); toast('Sesión cerrada', 'success'); pintar(); }
+    if (acc === 'volver-local') { Almacen.usarLocal(); toast('Se guarda en este celular', 'success'); pintar(); actualizarPanel(); }
   }
   async function cambioCuerpo(ev) {
     if (ev.target.id === 'reg-filtro') return pintarTablaTramites();
@@ -472,7 +486,7 @@ Authorization: Bearer &lt;clave del sistema&gt;</pre>
     if (f.dataset.form === 'tramite') {
       try { await Almacen.nuevoTramite(fichaDni, $('#reg-nt-tipo').value, $('#reg-nt-obs').value.trim()); toast('Trámite iniciado', 'success'); pintarFicha(); } catch (e) { toast(e.message, 'error'); }
     }
-    if (f.dataset.form === 'local') { Almacen.usarLocal($('#reg-agente').value.trim()); toast('Se guarda en este equipo', 'success'); pintar(); actualizarPanel(); }
+    if (f.dataset.form === 'local') { Almacen.usarLocal($('#reg-agente').value.trim()); toast('Nombre guardado', 'success'); pintar(); actualizarPanel(); }
     if (f.dataset.form === 'servidor') {
       const er = $('#reg-err-srv'); er.hidden = true;
       try { const u = await Almacen.entrar($('#reg-url').value, $('#reg-usuario').value.trim(), $('#reg-clave').value); toast('Sesión iniciada: ' + (u.nombre || u.usuario), 'success'); vista = 'personas'; pintar(); actualizarPanel(); }

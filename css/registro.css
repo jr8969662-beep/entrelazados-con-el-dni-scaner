@@ -428,3 +428,63 @@ button.reg-pase-fila:active { background: var(--accent-soft); }
   .reg-pase-k { grid-column: 1 / -1; font-size: 14.5px; margin-bottom: -6px; }
   .reg-pase-botones { grid-template-columns: 1fr; }
 }
+
+/* ==========================================================
+   v6 — El Registro cubre toda la pantalla, letra más grande, Ajustes simple
+   ========================================================== */
+.reg-modal { padding: 0; align-items: stretch; justify-content: center; background: var(--bg); }
+.reg-modal-content { max-width: none; width: 100%; height: 100%; max-height: none; border: 0; border-radius: 0; box-shadow: none; }
+@media (min-width: 901px) { .reg-modal-content { width: min(1000px, 100%); border-left: 1px solid var(--line); border-right: 1px solid var(--line); } }
+.reg-modal .modal-header { padding: calc(16px + env(safe-area-inset-top, 0px)) 18px 14px; }
+.reg-modal .modal-header h2 { font-size: 22px; }
+.reg-modal .icon-btn-close { width: 48px; height: 48px; font-size: 22px; }
+
+@media (max-width: 900px) {
+  .reg-tabs button { font-size: 18px; padding: 16px 15px; }
+  .reg-pad { padding: 18px 16px; }
+  .reg-buscar { min-height: 60px !important; font-size: 19px !important; }
+  .reg-item { padding: 20px 16px; }
+  .reg-item-dni { font-size: 20px; }
+  .reg-item-nom { font-size: 20px; }
+  .reg-item-nom small { font-size: 16px; }
+  .reg-chip { font-size: 14px; padding: 4px 11px; }
+  .reg-ident-dni { font-size: 40px; }
+  .reg-ident-nom { font-size: 28px; }
+  .reg-ident-sub { font-size: 18px; }
+  .reg-dato span { font-size: 16px; }
+  .reg-dato b { font-size: 21px; }
+  .reg-nota, .reg-sub { font-size: 16.5px; }
+  .reg-h3 { font-size: 17px; }
+  .reg-tramite { font-size: 18.5px; }
+  .reg-texto { font-size: 18.5px; }
+  .reg-tabla { font-size: 17.5px; }
+  .reg-est { font-size: 15px; }
+  .reg-pase-titulo { font-size: 23px; }
+  .reg-pase-intro, .reg-pase-estado { font-size: 17.5px; }
+  .reg-pase-k { font-size: 16px; }
+  .reg-pase-v { font-size: 19.5px; }
+  .reg-pase-copiar { font-size: 14.5px; padding: 7px 12px; }
+  .empty-state { font-size: 18.5px; }
+  .reg-ficha .btn, .reg-pase .btn { min-height: 58px; font-size: 17px; }
+}
+
+/* Ajustes */
+.reg-ajustes { display: grid; gap: 18px; }
+.reg-ahora { display: grid; gap: 4px; padding: 18px; border-radius: var(--radius); background: var(--accent-soft); border: 1px solid var(--accent); }
+.reg-ahora.srv { background: var(--ok-soft); border-color: var(--ok); }
+.reg-ahora-k { font-size: 16px; color: var(--text-secondary); }
+.reg-ahora-v { font-size: 26px; font-weight: 800; color: var(--text); }
+.reg-ahora-sub { font-size: 16px; color: var(--text-secondary); }
+.reg-ajustes .reg-ajuste { background: transparent; border: 0; padding: 0; gap: 12px; }
+.reg-ajustes .reg-campo span { font-size: 17px; font-weight: 700; color: var(--text); }
+.reg-ajustes .reg-campo input { min-height: 60px; font-size: 19px; }
+.reg-ayuda { margin: 0; font-size: 16.5px; color: var(--text-secondary); line-height: 1.45; }
+.reg-ancho-btn { width: 100%; min-height: 60px; font-size: 18px; }
+.reg-servidor { border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 12px; }
+.reg-servidor summary { cursor: pointer; font-size: 18px; font-weight: 700; color: var(--text-secondary); list-style: none; display: flex; align-items: center; justify-content: space-between; min-height: 52px; }
+.reg-servidor summary::-webkit-details-marker { display: none; }
+.reg-servidor summary::after { content: "›"; font-size: 28px; line-height: 1; transition: transform .2s; }
+.reg-servidor[open] summary::after { transform: rotate(90deg); }
+
+/* el nombre completo se lee entero en la lista (sin cortar con "…") */
+.reg-item-nom { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; line-height: 1.3; }
