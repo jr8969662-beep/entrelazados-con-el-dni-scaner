@@ -171,3 +171,76 @@
   .domicilio-label { font-size: 13px; }
   .domicilio-input { min-height: 50px; font-size: 16px; }
 }
+
+/* ==========================================================
+   v3 — TODA la app más grande en el celular (escáner + ficha + Registro)
+   ========================================================== */
+@media (max-width: 640px) {
+  body { font-size: 17px; }
+  .app-header-inner { padding: 12px 14px; }
+  .brand-icon { width: 46px; height: 50px; }
+  .brand-text h1 { font-size: 18px; }
+  .brand-text p { font-size: 12.5px; }
+  .icon-action { width: 46px; height: 46px; }
+  .icon-action svg { width: 24px; height: 24px; }
+  .status-pill { font-size: 12.5px; padding: 8px 12px; }
+  .app-version { font-size: 12px; padding: 2px 9px; }
+  .app-main { padding: 14px 12px; gap: 14px; }
+
+  .country-selector, .tipo-dni { padding: 14px; }
+  .country-selector-label, .tipo-dni-label { font-size: 14px; }
+  .country-selector-hint { font-size: 13px; }
+  .country-chip { font-size: 16px; padding: 12px 15px; }
+  .country-chip .flag { font-size: 22px; }
+  .tipo-dni-btn { min-height: 68px; padding: 12px 8px; }
+  .tipo-dni-nombre { font-size: 19px; }
+  .tipo-dni-desc { font-size: 14px; }
+
+  /* cámara de borde a borde y marco más grande */
+  .camera-card { margin-left: -12px; margin-right: -12px; border-radius: 0; border-left: 0; border-right: 0; }
+  .scan-frame { width: 94%; }
+  .scan-frame .corner { width: 38px; height: 38px; }
+  .camera-hint { font-size: 15px; padding: 8px 16px; max-width: 86%; }
+  .icon-btn { width: 50px; height: 50px; font-size: 22px; }
+  .zoom-label { font-size: 15px; }
+  .camera-actions { padding: 14px 12px; }
+  .status-line { font-size: 15px; padding: 12px 14px; }
+  .camera-error-text { font-size: 16px; }
+
+  .btn { min-height: 54px; font-size: 15.5px; padding: 0 18px; }
+  .btn-sm { min-height: 48px; font-size: 14.5px; }
+
+  /* ficha */
+  .result-header { padding: 16px; }
+  .result-badge-pais { width: 52px; height: 52px; font-size: 32px; }
+  .result-header h2 { font-size: 17px; }
+  .result-subtitle { font-size: 14px; }
+  .badge { font-size: 13px; padding: 5px 10px; }
+  .main-number-block { padding: 22px 16px; }
+  .main-number-label { font-size: 13.5px; }
+  .main-number-value { font-size: clamp(36px, 11vw, 46px); }
+  .group { padding: 16px; }
+  .group-title { font-size: 13.5px; margin-bottom: 10px; }
+  .group-title svg { width: 18px; height: 18px; }
+  .field { padding: 11px 0; gap: 12px; }
+  .field-label { font-size: 15px; }
+  .field-value { font-size: 17.5px; }
+  .btn-domicilio { min-height: 58px; font-size: 15px; }
+  .result-actions { padding: 16px; }
+  .raw-data summary { font-size: 14.5px; }
+  .raw-data pre { font-size: 13px; }
+
+  .toast { font-size: 16px; padding: 14px 20px; }
+  .modal-header h2 { font-size: 16px; }
+  .icon-btn-close { min-width: 44px; min-height: 44px; font-size: 20px; }
+  .empty-state { font-size: 16px; }
+}
+/* en el celular el nombre de la app no se corta: el estado queda solo como punto de color (el texto se ve abajo de la cámara) */
+@media (max-width: 520px) {
+  .status-pill { padding: 0; width: 46px; height: 46px; justify-content: center; }
+  .status-pill #status-text { display: none; }
+  .status-pill .dot { width: 12px; height: 12px; }
+  .brand { gap: 8px; }
+  .brand-icon { width: 38px; height: 44px; }
+  .brand-text h1 { font-size: 17px; letter-spacing: .05em; }
+}
