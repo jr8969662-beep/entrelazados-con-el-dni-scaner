@@ -397,9 +397,9 @@
     if (stopScan) { stopScan(); stopScan = null; } if (cameraHint) cameraHint.style.opacity = '0'; setEstadoMarco('ok'); animarCaptura();
     if (flashEncendido && trackActual) { trackActual.applyConstraints({ advanced: [{ torch: false }] }).catch(() => {}); flashEncendido = false; autoFlashActivo = false; if (btnFlash) btnFlash.classList.remove('encendido'); }
     
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.8); 
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.9); 
     ultimaFotoCompletaUrl = dataUrl;   // la imagen entera: la usa la lectura del texto del frente (completarDesdeFrente)
-    ultimaFotoDataUrl = fotoDelMarco(canvas).toDataURL('image/jpeg', 0.85);
+    ultimaFotoDataUrl = fotoDelMarco(canvas).toDataURL('image/jpeg', 0.92);
     
     if (img) { img.src = dataUrl; img.hidden = false; } video.hidden = true;
     if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } trackActual = null; if (zoomControl) zoomControl.hidden = true;
@@ -1580,7 +1580,7 @@
       }
     } catch (e) { foto = frame; }
     if (flashEncendido && trackActual) { trackActual.applyConstraints({ advanced: [{ torch: false }] }).catch(() => {}); flashEncendido = false; autoFlashActivo = false; if (btnFlash) btnFlash.classList.remove('encendido'); }
-    ultimaFotoDataUrl = fotoDelMarco(foto).toDataURL('image/jpeg', 0.85); ladoFoto = 'reverso'; ultimaFotoCompletaUrl = null;
+    ultimaFotoDataUrl = fotoDelMarco(foto).toDataURL('image/jpeg', 0.92); ladoFoto = 'reverso'; ultimaFotoCompletaUrl = null;
     if (img) { img.src = ultimaFotoDataUrl; img.hidden = false; } if (video) video.hidden = true;
     if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
     trackActual = null; if (zoomControl) zoomControl.hidden = true;
@@ -1667,7 +1667,7 @@
       trackActual.applyConstraints({ advanced: [{ torch: false }] }).catch(() => {});
       flashEncendido = false; autoFlashActivo = false; if (btnFlash) btnFlash.classList.remove('encendido');
     }
-    const dataUrl = fotoDelMarco(frame, origen && origen.rc, origen && origen.anchoVideo).toDataURL('image/jpeg', 0.85);
+    const dataUrl = fotoDelMarco(frame, origen && origen.rc, origen && origen.anchoVideo).toDataURL('image/jpeg', 0.92);
     ultimaFotoDataUrl = dataUrl; ladoFoto = 'reverso'; ultimaFotoCompletaUrl = null;
     if (img) { img.src = dataUrl; img.hidden = false; } if (video) video.hidden = true;
     if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
@@ -1922,7 +1922,7 @@
     }
     if (auto) { detenerDeteccionDNINuevo(); if (stopScan) { stopScan(); stopScan = null; } }
     setEstadoMarco('ok'); animarCaptura();
-    ultimaFotoDataUrl = fotoDelMarco(canvasF).toDataURL('image/jpeg', 0.85); ladoFoto = 'frente'; ultimaFotoCompletaUrl = null;
+    ultimaFotoDataUrl = fotoDelMarco(canvasF).toDataURL('image/jpeg', 0.92); ladoFoto = 'frente'; ultimaFotoCompletaUrl = null;
     if (img) { img.src = ultimaFotoDataUrl; img.hidden = false; } if (video) video.hidden = true;
     if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } trackActual = null; if (zoomControl) zoomControl.hidden = true;
     if (scanFrame) scanFrame.classList.remove('activo');
